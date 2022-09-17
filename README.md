@@ -14,6 +14,12 @@ Before you move on, make sure you take a good read at the introductory tutorials
 
 ## Table of Contents
 
+- [Setup Your Certificates](#setup-your-certificates)
+- [v1 - HTTPS With Config Files](#v1---https-with-config-files)
+- [v2 - HTTPS With Labels](#v2---https-with-labels)
+- [v3 - HTTPS With Custom Image](#v3---https-with-custom-image)
+- [v4 - HTTPS With Docker Image](#v4---https-with-docker-image)
+
 ## Setup Your Certificates
 
 A precondition to run this tutorial is to setup your development machine as a _Certificate Authorithy_ that your browser can trust. 
@@ -44,7 +50,7 @@ mkcert -cert-file certs/local-cert.pem -key-file certs/local-key.pem "*.docker.l
 >
 > **It only accepts 3rd level wlidcards.**
 
-## v1 - With Config Files
+## v1 - HTTPS With Config Files
 
 Moving my first steps into local TSL, I resolved to my best friend Google and found out this setup:
 
@@ -65,7 +71,7 @@ In my version, I believe I've simplified things a bit:
 - enable TSL by default on every route
 - removed external network (although it could come in handy)
 
-## v2 - With Labels
+## v2 - HTTPS With Labels
 
 Althoug V1 works, I'm not a big fan of multiple configuration files. I like to keep stuff as simple as they can possibly be.
 
@@ -98,7 +104,7 @@ docker-compose -f docker-compose-with-config.yml up
 
 > I don't think this hybrid configuration is a good idea.
 
-## v3 - With Custom Image
+## v3 - HTTPS With Custom Image
 
 In the pursue of minimizing, or at least, centralizing the configuration that we need to run a local environment, I came up with the idea of packing everything within a custom Docker image.
 
@@ -112,11 +118,15 @@ If I want to run my containers on different domains, say `foo.bar.localhost`, I'
 mkcert -cert-file certs/local-cert.pem -key-file certs/local-key.pem "*.docker.localhost" "*.bar.localhost"
 ```
 
-A possibile improvement over this implementation would be to actually inline the whole `Dockerfile` within the `docker-compose.yml`. I found [an open proposal](https://github.com/compose-spec/compose-spec/issues/216) for doing exactly that, but it is not possible just yet.
+👉 A possibile improvement over this implementation would be to actually inline the whole `Dockerfile` within the `docker-compose.yml`. I found [an open proposal](https://github.com/compose-spec/compose-spec/issues/216) for doing exactly that, but it is not possible just yet.
 
-## v4 - With Docker Image
+## v4 - HTTPS With Docker Image
 
-The final step was for me to simply push my custom image to Docker Hub:
+I've wrapped up the _v3_ solution into a custom Docker image and published it to DockerHub:
+
+https://hub.docker.com/repository/docker/marcopeg/traefik-local-tls
+
+Here is my updated `docker-compose.yml`:
 
 ```yml
 version: '3'
