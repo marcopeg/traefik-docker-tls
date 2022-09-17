@@ -112,6 +112,38 @@ If I want to run my containers on different domains, say `foo.bar.localhost`, I'
 mkcert -cert-file certs/local-cert.pem -key-file certs/local-key.pem "*.docker.localhost" "*.bar.localhost"
 ```
 
+A possibile improvement over this implementation would be to actually inline the whole `Dockerfile` within the `docker-compose.yml`. I found [an open proposal](https://github.com/compose-spec/compose-spec/issues/216) for doing exactly that, but it is not possible just yet.
+
+## v4 - With Docker Image
+
+The final step was for me to simply push my custom image to Docker Hub:
+
+```yml
+version: '3'
+services:
+  proxy:
+    image: marcopeg/traefik-local-tls
+    ports:
+      - 80:80
+      - 443:443
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ../certs:/etc/certs:ro
+
+  whoami:
+    image: containous/whoami
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.whoami.rule=Host(`whoami.docker.localhost`)"
+```
+
+You can run this as:
+
+```bash
+cd v4
+docker-compose up
+```
+
 [tutorial1]: https://github.com/marcopeg/cra-docker-traefik#readme
 [tutorial2]: https://github.com/marcopeg/traefik-docker-multi-project#readme
 [traefik]: https://traefik.io/
