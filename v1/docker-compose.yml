@@ -1,0 +1,18 @@
+version: '3'
+
+services:
+  proxy:
+    image: traefik:v2.8
+    ports:
+      - 80:80
+      - 443:443
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ../certs:/etc/certs:ro
+      - ./traefik-config:/etc/traefik:ro
+
+  whoami:
+    image: containous/whoami
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.whoami.rule=Host(`whoami.docker.localhost`)"

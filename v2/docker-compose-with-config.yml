@@ -1,0 +1,36 @@
+version: '3'
+
+services:
+  proxy:
+    image: traefik:v2.8
+    command:
+      - "--api.insecure=true"
+      - "--api.dashboard=true"
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--entrypoints.http.address=:80"
+      - "--entrypoints.https.address=:443"
+      - "--entrypoints.https.http.tls=true"
+      - "--log.level=INFO"
+      - "--log.format=common"
+      # 🧐 Provide the dynamic configuration to setup certificates:
+      - "--providers.file=true"
+      - "--providers.file.filename=/etc/traefik/dynamic.yml"
+    ports:
+      - 80:80
+      - 443:443
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ../certs:/etc/certs:ro
+      # 🧐 Provide the dynamic configuration to setup certificates:
+      - ./traefik-config.yml:/etc/traefik/dynamic.yml:ro
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.traefik.rule=Host(`traefik.docker.localhost`)"
+      - "traefik.http.routers.traefik.service=api@internal"
+
+  whoami:
+    image: containous/whoami
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.whoami.rule=Host(`whoami.docker.localhost`)"
